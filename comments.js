@@ -1,39 +1,30 @@
 // Create web Server
-// 1. Create a server
-// 2. Create a request handler
-// 3. Listen to the port
-
 const http = require('http');
 const fs = require('fs');
-const url = require('url');
+const path = require('path');
 
-// 1. Create a server
-const server = http.createServer((req, res) => {
-    console.log(req.url);
-    const pathName = url.parse(req.url, true).pathname;
-    const query = url.parse(req.url, true).query;
-    console.log(query);
-
-    // 2. Create a request handler
-    if (pathName === '/' || pathName === '/overview') {
-        res.end('This is the OVERVIEW');
-    } else if (pathName === '/product') {
-        res.end('This is the PRODUCT');
-    } else if (pathName === '/api') {
-        fs.readFile(`${__dirname}/dev-data/data.json`, 'utf-8', (err, data) => {
-            const productData = JSON.parse(data);
-            // console.log(productData);
-            res.writeHead(200, { 'Content-Type': 'application/json' });
+// Create web server
+http.createServer((req, res) => {
+    // Read the URL
+    if (req.url === '/') {
+        fs.readFile(path.join(__dirname, 'public', 'index.html'), (err, data) => {
+            if (err) throw err;
+            res.writeHead(200, { 'Content-Type': 'text/html' });
             res.end(data);
         });
-    } else {
-        res.writeHead(404, {
-            'Content-Type': 'text/html',
-            'my-own-header': 'hello-world',
+    } else if (req.url === '/about') {
+        fs.readFile(path.join(__dirname, 'public', 'about.html'), (err, data) => {
+            if (err) throw err;
+            res.writeHead(200, { 'Content-Type': 'text/html' });
+            res.end(data);
         });
-        res.end('<h1>Page not found</h1>');
+    } else if (req.url === '/api/users') {
+        const users = [
+            { name: 'Bob Smith', age: 40 },
+            { name: 'John Doe', age: 30 }
+        ];
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(users));
     }
-});
-
-// 3. Listen to the port
-server.listen(8000, 'server running on port 8000');
+}).listen(5000, () => console.log('Server is running...'));
+// Open browser and type: http://localhost:5000
